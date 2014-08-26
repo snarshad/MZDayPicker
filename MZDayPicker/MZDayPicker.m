@@ -25,6 +25,7 @@
 
 #import "MZDayPicker.h"
 #import "MZDayPickerCell.h"
+#import "NSDate+MZExtensions.h"
 #import <QuartzCore/QuartzCore.h>
 
 CGFloat const kDefaultDayLabelFontSize = 25.0f;
@@ -57,7 +58,7 @@ NSInteger const kDefaultFinalInactiveDays = 8;
 
 static BOOL NSRangeContainsRow (NSRange range, NSInteger row) {
     
-    if (row <= range.location+range.length  && row >= range.location ) {
+    if (row <= (NSInteger)(range.location+range.length)  && row >= (NSInteger)range.location ) {
         return YES;
     }
     
@@ -204,6 +205,31 @@ static BOOL NSRangeContainsRow (NSRange range, NSInteger row) {
     [self setCurrentDate:date animated:NO];
 }
 
+- (void)reloadDataForDate:(NSDate *)date animated:(BOOL)animated {
+    MZDay *day = [MZDay dayForDate:[date mz_floor]];
+    MZDayPickerCell *cell = [self cellForDay:day];
+    
+    
+    if (cell) {
+        if (animated) {
+            [UIView animateWithDuration:.5 animations:^{
+                cell.backgroundColor = [UIColor greenColor];
+                [self populateCellData:cell forDay:day];
+            } completion:^(BOOL finished) {
+                if (finished) {
+                    [UIView animateWithDuration:.5 animations:^{
+                        cell.backgroundColor = kDefaultColorBackground;
+                    } completion:nil];
+                } else {
+                    cell.backgroundColor = kDefaultColorBackground;
+                }
+            }];
+        } else {
+            cell.backgroundColor = kDefaultColorBackground;
+        }
+    }
+}
+
 
 - (void)setCurrentIndex:(NSIndexPath *)currentIndex {
     _currentIndex = currentIndex;
@@ -228,6 +254,23 @@ static BOOL NSRangeContainsRow (NSRange range, NSInteger row) {
     
     return (MZDayPickerCell *)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:dayIndex inSection:0]];
 }
+
+- (MZDayPickerCell *)cellForDate:(NSDate *)date
+{
+    NSInteger dayIndex = [self.tableDaysData indexOfObjectPassingTest:^BOOL(MZDay *day, NSUInteger idx, BOOL *stop) {
+        if ([day.date compare:[date mz_floor]] == NSOrderedSame) {
+            *stop = YES;
+            return YES;
+        }
+        return NO;
+    }];
+    
+    if (dayIndex != NSNotFound) {
+        return (MZDayPickerCell *)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:dayIndex inSection:0]];
+    }
+    return nil;
+}
+
 
 - (void)reloadData
 {
@@ -284,6 +327,8 @@ static BOOL NSRangeContainsRow (NSRange range, NSInteger row) {
         self.layer.shadowOpacity = kDefaultShadowOpacity;
         self.layer.shadowRadius = 5;
         self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
+        
+        self.tableView.scrollsToTop = NO;
         
     }
     return self;
@@ -372,33 +417,19 @@ static BOOL NSRangeContainsRow (NSRange range, NSInteger row) {
 
     NSMutableArray *tableData = [NSMutableArray array];
     
-    NSDateFormatter *dateNameFormatter = [[NSDateFormatter alloc] init];
-    [dateNameFormatter setDateFormat:@"EEEE"];
-    
-    NSDateFormatter *dateNumberFormatter = [[NSDateFormatter alloc] init];
-    [dateNumberFormatter setDateFormat:@"dd"];
     
     for (int i = kDefaultInitialInactiveDays; i >= 1; i--) {
         NSDate *date = [_startDate dateByAddingTimeInterval:-(i * 60.0 * 60.0 * 24.0)];
-        
-        MZDay *newDay = [[MZDay alloc] init];
-        newDay.day = @([[dateNumberFormatter stringFromDate:date] integerValue]);
-        newDay.name = [dateNameFormatter stringFromDate:date];
-        newDay.date = date;
-        
+        MZDay *newDay = [MZDay dayForDate:date];
+
         [tableData addObject:newDay];
     }
     
     NSInteger numberOfActiveDays = 0;
     
     for (NSDate *date = _startDate; [date compare: _endDate] <= 0; date = [date dateByAddingTimeInterval:24 * 60 * 60] ) {
-
-        MZDay *newDay = [[MZDay alloc] init];
-        newDay.day = @([[dateNumberFormatter stringFromDate:date] integerValue]);
-        newDay.name = [dateNameFormatter stringFromDate:date];
-        newDay.date = date;
         
-        [tableData addObject:newDay];
+        [tableData addObject:[MZDay dayForDate:date]];
         
         numberOfActiveDays++;
     }
@@ -406,12 +437,7 @@ static BOOL NSRangeContainsRow (NSRange range, NSInteger row) {
     for (int i = 1; i <= kDefaultFinalInactiveDays; i++) {
         NSDate *date = [_endDate dateByAddingTimeInterval:(i * 60.0 * 60.0 * 24.0)];
 
-        MZDay *newDay = [[MZDay alloc] init];
-        newDay.day = @([[dateNumberFormatter stringFromDate:date] integerValue]);
-        newDay.name = [dateNameFormatter stringFromDate:date];
-        newDay.date = date;
-        
-        [tableData addObject:newDay];
+        [tableData addObject:[MZDay dayForDate:date]];
     }
     
     self.tableDaysData = [tableData copy];
@@ -565,28 +591,7 @@ static BOOL NSRangeContainsRow (NSRange range, NSInteger row) {
     return self.dayCellSize.width;
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    static NSString* reuseIdentifier = @"MZDayPickerCell";
-    
-    MZDayPickerCell *cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
-    
-    if (!cell) {
-        cell = [[MZDayPickerCell alloc] initWithSize:self.dayCellSize footerHeight:self.dayCellFooterHeight reuseIdentifier:reuseIdentifier];
-    }
-    
-    MZDay *day = self.tableDaysData[indexPath.row];
-    
-    // Bug: I can't use default UITableView select row, because in some case, row's didn't selected
-    // I Handled it by tap gesture recognizer
-    [cell setUserInteractionEnabled:NO];
-    
-    cell.dayLabel.textColor = self.activeDayNameColor;
-    cell.dayLabel.font = [cell.dayLabel.font fontWithSize:self.dayLabelFontSize];
-    cell.dayNameLabel.font = [cell.dayNameLabel.font fontWithSize:self.dayNameLabelFontSize]; //This was set to the same font, making it impossible to have seperate fonts for day and number
-    cell.dayNameLabel.textColor = self.activeDayNameColor;
-    [cell setBottomBorderColor:self.bottomBorderColor];
-    
+- (void)populateCellData:(MZDayPickerCell *)cell forDay:(MZDay *)day {
     cell.dayLabel.text = [NSString stringWithFormat:@"%@",day.day];
     cell.dayNameLabel.text = [NSString stringWithFormat:@"%@",day.name];
     
@@ -597,6 +602,35 @@ static BOOL NSRangeContainsRow (NSRange range, NSInteger row) {
     if ([self.dataSource respondsToSelector:@selector(dayPicker:titleForCellDayNameLabelInDay:)]) {
         cell.dayNameLabel.text = [self.dataSource dayPicker:self titleForCellDayNameLabelInDay:day];
     }
+    
+    if ([self.dataSource respondsToSelector:@selector(dayPicker:subtitleForCellDayNameLabelInDay:)]) {
+        cell.subtitleLabel.text = [self.dataSource dayPicker:self subtitleForCellDayNameLabelInDay:day];
+    }
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString* reuseIdentifier = @"MZDayPickerCell";
+    
+    MZDayPickerCell *cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
+    
+    if (!cell) {
+        cell = [[MZDayPickerCell alloc] initWithSize:self.dayCellSize footerHeight:self.dayCellFooterHeight reuseIdentifier:reuseIdentifier];
+    }
+    
+    // Bug: I can't use default UITableView select row, because in some case, row's didn't selected
+    // I Handled it by tap gesture recognizer
+    [cell setUserInteractionEnabled:NO];
+    
+    cell.dayLabel.textColor = self.activeDayNameColor;
+    cell.dayLabel.font = [cell.dayLabel.font fontWithSize:self.dayLabelFontSize];
+    cell.dayNameLabel.font = [cell.dayNameLabel.font fontWithSize:self.dayNameLabelFontSize]; //This was set to the same font, making it impossible to have seperate fonts for day and number
+    cell.dayNameLabel.textColor = self.activeDayNameColor;
+    cell.subtitleLabel.font = [cell.dayNameLabel.font fontWithSize:self.dayNameLabelFontSize - 1];
+    [cell setBottomBorderColor:self.bottomBorderColor];
+
+    MZDay *day = self.tableDaysData[indexPath.row];
+    [self populateCellData:cell forDay:day];
     
     [self setShadowForCell:cell];
     
@@ -618,10 +652,12 @@ static BOOL NSRangeContainsRow (NSRange range, NSInteger row) {
     if (NSRangeContainsRow(self.activeDays, indexPath.row - kDefaultInitialInactiveDays + 1)) {
         cell.dayLabel.textColor = self.activeDayColor;
         cell.dayNameLabel.textColor = self.activeDayNameColor;
+        cell.subtitleLabel.textColor = self.activeDayColor;
         
     } else {
         cell.dayLabel.textColor = self.inactiveDayColor;
         cell.dayNameLabel.textColor = self.inactiveDayColor;
+        cell.subtitleLabel.textColor = self.inactiveDayColor;
     }
     
     return cell;
@@ -675,8 +711,7 @@ static BOOL NSRangeContainsRow (NSRange range, NSInteger row) {
     
     NSCalendar       *calendar   = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
     [calendar setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
-    NSDateComponents *components = [[NSDateComponents alloc] init];
-    components = [calendar components:NSYearCalendarUnit|NSMonthCalendarUnit|NSDayCalendarUnit
+    NSDateComponents *components = [calendar components:NSYearCalendarUnit|NSMonthCalendarUnit|NSDayCalendarUnit
                              fromDate:dateTime];
     
     NSDate *dateOnly = [calendar dateFromComponents:components];

@@ -33,4 +33,6 @@
 @property (nonatomic,strong) NSNumber *year;
 
 @property (nonatomic,strong) NSString *name;
+
++ (MZDay *)dayForDate:(NSDate *)date;
 @end

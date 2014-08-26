@@ -33,7 +33,7 @@
 @optional
 - (NSString *)dayPicker:(MZDayPicker *)dayPicker titleForCellDayLabelInDay:(MZDay *)day;
 - (NSString *)dayPicker:(MZDayPicker *)dayPicker titleForCellDayNameLabelInDay:(MZDay *)day;
-
+- (NSString *)dayPicker:(MZDayPicker *)dayPicker subtitleForCellDayNameLabelInDay:(MZDay *)day;
 @end
 
 @protocol MZDayPickerDelegate <NSObject>
@@ -92,8 +92,8 @@
 @property (nonatomic, strong) NSDate *endDate;
 @property (nonatomic, strong) NSDate *currentDate;
 
-@property (nonatomic, weak) id<MZDayPickerDelegate> delegate;
-@property (nonatomic, weak) id<MZDayPickerDataSource> dataSource;
+@property (nonatomic, weak) IBOutlet id<MZDayPickerDelegate> delegate;
+@property (nonatomic, weak) IBOutlet id<MZDayPickerDataSource> dataSource;
 
 /*
  * Initializers
@@ -122,6 +122,12 @@
  * Setter for currentDate
  */
 - (void)setCurrentDate:(NSDate *)date animated:(BOOL)animated;
+
+/*
+ * Flash and reload a particular date
+ */
+- (void)reloadDataForDate:(NSDate *)date animated:(BOOL)animated;
+
 
 /*
  * Reload dataSource and setup scrollview content

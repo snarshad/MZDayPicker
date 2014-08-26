@@ -22,6 +22,7 @@
 		D285CAD4172AA63D00452B91 /* MZDay.m in Sources */ = {isa = PBXBuildFile; fileRef = D285CACF172AA63D00452B91 /* MZDay.m */; };
 		D285CAD5172AA63D00452B91 /* MZDayPicker.m in Sources */ = {isa = PBXBuildFile; fileRef = D285CAD1172AA63D00452B91 /* MZDayPicker.m */; };
 		D285CAD6172AA63D00452B91 /* MZDayPickerCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D285CAD3172AA63D00452B91 /* MZDayPickerCell.m */; };
+		EF61AD3319AD226900A10330 /* NSDate+MZExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = EF61AD3219AD226900A10330 /* NSDate+MZExtensions.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +49,8 @@
 		D285CAD1172AA63D00452B91 /* MZDayPicker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MZDayPicker.m; path = ../../../MZDayPicker/MZDayPicker.m; sourceTree = "<group>"; };
 		D285CAD2172AA63D00452B91 /* MZDayPickerCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MZDayPickerCell.h; path = ../../../MZDayPicker/MZDayPickerCell.h; sourceTree = "<group>"; };
 		D285CAD3172AA63D00452B91 /* MZDayPickerCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MZDayPickerCell.m; path = ../../../MZDayPicker/MZDayPickerCell.m; sourceTree = "<group>"; };
+		EF61AD3119AD226900A10330 /* NSDate+MZExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSDate+MZExtensions.h"; path = "../../../MZDayPicker/NSDate+MZExtensions.h"; sourceTree = "<group>"; };
+		EF61AD3219AD226900A10330 /* NSDate+MZExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSDate+MZExtensions.m"; path = "../../../MZDayPicker/NSDate+MZExtensions.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -129,6 +132,8 @@
 				D285CAD1172AA63D00452B91 /* MZDayPicker.m */,
 				D285CAD2172AA63D00452B91 /* MZDayPickerCell.h */,
 				D285CAD3172AA63D00452B91 /* MZDayPickerCell.m */,
+				EF61AD3119AD226900A10330 /* NSDate+MZExtensions.h */,
+				EF61AD3219AD226900A10330 /* NSDate+MZExtensions.m */,
 			);
 			name = MZDayPicker;
 			sourceTree = "<group>";
@@ -201,6 +206,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EF61AD3319AD226900A10330 /* NSDate+MZExtensions.m in Sources */,
 				062E33351725A9A5009B699E /* main.m in Sources */,
 				062E33391725A9A5009B699E /* MZAppDelegate.m in Sources */,
 				062E33451725A9A6009B699E /* MZViewController.m in Sources */,
