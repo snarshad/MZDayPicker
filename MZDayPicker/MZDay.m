@@ -24,7 +24,34 @@
 //  THE SOFTWARE.
 
 #import "MZDay.h"
+#import "NSDate+MZExtensions.h"
 
 @implementation MZDay
++ (MZDay *)dayForDate:(NSDate *)date {
+    
+    static NSDateFormatter *dateNameFormatter = nil;
+    
+    static NSDateFormatter *dateNumberFormatter = nil;
+    
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        dateNameFormatter = [[NSDateFormatter alloc] init];
+        [dateNameFormatter setDateFormat:@"EEEE"];
+
+        dateNumberFormatter = [[NSDateFormatter alloc] init];
+        [dateNumberFormatter setDateFormat:@"dd"];
+    });
+
+    
+    MZDay *newDay = [[MZDay alloc] init];
+    newDay.day = @([[dateNumberFormatter stringFromDate:date] integerValue]);
+    newDay.name = [dateNameFormatter stringFromDate:date];
+    newDay.date = date;
+    return newDay;
+}
+
+- (BOOL)isEqual:(MZDay *)otherDay {
+    return [[self.date mz_floor] compare:[[otherDay date] mz_floor]] == NSOrderedSame;
+}
 
 @end
