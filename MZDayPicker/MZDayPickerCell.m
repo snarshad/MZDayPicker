@@ -83,13 +83,13 @@
 {
     if (self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier]) {
         
-        if (CGSizeEqualToSize(size, CGSizeZero)) 
+        if (CGSizeEqualToSize(size, CGSizeZero))
             [NSException raise:NSInvalidArgumentException format:@"MZDayPickerCell size can't be zero!"];
-         else 
+        else
             self.cellSize = size;
         
         self.footerHeight = footerHeight;
-
+        
         [self applyCellStyle];
     }
     
@@ -98,7 +98,7 @@
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
-
+    
     if (self = [self initWithSize:CGSizeZero footerHeight:0.0 reuseIdentifier:reuseIdentifier]) {
         
     }
@@ -116,16 +116,16 @@
     self.dayLabel.backgroundColor = [UIColor clearColor];
     
     self.dayNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.cellSize.width, self.cellSize.height)];
-    self.dayNameLabel.center = CGPointMake(containingView.frame.size.width/2, self.cellSize.height/1.3);
+    self.dayNameLabel.center = CGPointMake(containingView.frame.size.width/2, self.cellSize.height/1.3 - 4);
     self.dayNameLabel.textAlignment = NSTextAlignmentCenter;
     self.dayNameLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:self.dayNameLabel.font.pointSize];
     self.dayNameLabel.backgroundColor = [UIColor clearColor];
     
     self.subtitleLabel = [[UILabel alloc] initWithFrame:self.dayNameLabel.frame];
-    self.subtitleLabel.center = CGPointMake(self.dayNameLabel.center.x, self.dayNameLabel.center.y + 7);
+    self.subtitleLabel.center = CGPointMake(self.dayNameLabel.center.x, self.cellSize.height - 7.5);
     self.subtitleLabel.textAlignment = NSTextAlignmentCenter;
     self.subtitleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:self.dayNameLabel.font.pointSize-2];
-//    self.subtitleLabel.backgroundColor = [UIColor greenColor];
+    self.subtitleLabel.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
     
     [containingView addSubview: self.dayLabel];
     [containingView addSubview: self.dayNameLabel];
